@@ -31,10 +31,15 @@
                     <td class="border px-4 py-2">{{ s.phone }}</td>
                     <td class="border px-4 py-2">{{ s.chassis_number }}</td>
                     <td class="border px-4 py-2">{{ s.service_charge }}</td>
-                    <td class="border px-4 py-2"></td>
-                    <td class="border px-4 py-2"></td>
-                    <td class="border px-4 py-2">{{ s.start_time }}</td>
-                    <td class="border px-4 py-2">{{ s.end_time }}</td>
+                    <td class="border px-4 py-2">
+                        {{s.parts && s.parts.length ? s.parts.reduce((sum, p) => sum + (p.retail_price || 0), 0) : 0}}
+                    </td>
+                    <td class="border px-4 py-2">
+                        {{(s.service_charge ? Number(s.service_charge) : 0) + (s.parts && s.parts.length ?
+                            s.parts.reduce((sum, p) => sum + (p.retail_price || 0), 0) : 0) }}
+                    </td>
+                    <td class="border px-4 py-2">{{ s.service_time }}</td>
+                    <td class="border px-4 py-2">{{ s.service_end_time }}</td>
                     <td class="border px-4 py-2">{{ s.actual_time }}</td>
                     <td class="border px-4 py-2">
                         <button @click="serviceAction(s)" class="text-red-600 hover:underline">Action</button>
@@ -68,7 +73,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="p in parts.parts" :key="p.id">
+                <tr v-for="p in parts" :key="p.id">
                     <td class="border px-4 py-2">{{ p.code }}</td>
                     <td class="border px-4 py-2">{{ p.retail_price }}</td>
                     <td class="border px-4 py-2">{{ p.discount_amount }}</td>
@@ -124,8 +129,8 @@ const partsPrice = (service) => {
 }
 
 const fetchParts = async () => {
-    const res = await axios.get('/api/parts')
-    parts.value = res.data
+    const res = await axios.get('/api/parts-discount')
+    parts.value = res.data.parts
 }
 
 onMounted(() => {

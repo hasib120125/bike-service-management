@@ -30,6 +30,7 @@ class ServiceController extends Controller
             'bay_number' => 'required',
             'service_charge' => 'required',
             'service_type' => 'nullable',
+            'service_time' => 'nullable',
             'image' => 'nullable|max:2048',
             'parts' => 'array',
             'parts.*' => 'integer|exists:parts,id',
@@ -91,7 +92,7 @@ class ServiceController extends Controller
         //
     }
 
-    public function getParts()
+    public function partsDiscount()
     {
         $parts = DB::table('parts')->get();
         $total_price = $parts->sum('retail_price');
@@ -115,5 +116,11 @@ class ServiceController extends Controller
             'total_price' => $total_price,
             'total_discount' => $total_discount,
         ]);
+    }
+
+    public function getParts()
+    {
+        $parts = DB::table('parts')->get();
+        return response()->json($parts);
     }
 }

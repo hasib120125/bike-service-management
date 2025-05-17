@@ -46,7 +46,8 @@
             </div>
 
             <div>
-                <input v-model="form.service_time" class="border p-2 rounded block w-full" placeholder="Service Time" />
+                <input type="datetime-local" v-model="form.service_time" class="border p-2 rounded block w-full"
+                    placeholder="Service Time" />
                 <p v-if="errors.service_time" class="text-red-600 text-sm">{{ errors.service_time[0] }}</p>
             </div>
 
@@ -124,10 +125,26 @@ onMounted(async () => {
 const saveService = async () => {
     errors.value = {} // clear previous errors
     try {
+        const formData = new FormData();
+        for (const key in form.value) {
+            if (key === 'parts') {
+                form.value.parts.forEach(partId => {
+                    formData.append('parts[]', partId);
+                });
+            } else if (key === 'image' && form.value.image) {
+                formData.append('image', form.value.image);
+            } else if (form.value[key] !== null && form.value[key] !== undefined) {
+                formData.append(key, form.value[key]);
+            }
+        }
         if (isEdit.value) {
-            await axios.put(`/api/services/${form.value.id}`, form.value)
+            await axios.post(`/api/services/${form.value.id}?_method=PUT`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
         } else {
-            await axios.post('/api/services', form.value)
+            await axios.post('/api/services', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
         }
         router.push('/services')
     } catch (err) {
